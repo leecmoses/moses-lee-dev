@@ -1,47 +1,156 @@
 "use strict";
 
 ///////////////////////////////////////
-// Modal window
+// Global selectors
 
-const btnScrollTo = document.querySelector(".btn--scroll-to");
-const section2 = document.querySelector("#section--2");
 const nav = document.querySelector(".nav");
+const header = document.querySelector(".header");
+const navHeight = nav.getBoundingClientRect().height;
+const hamburger = document.querySelector("[data-nav-hamburguer]");
+const navLinksWrapper = document.querySelector("[data-nav-links]");
 const tabs = document.querySelectorAll(".toolkit__tab");
 const tabsContainer = document.querySelector(".toolkit__tab-container");
 const tabsContent = document.querySelectorAll(".toolkit__content");
-const allSections = document.querySelectorAll(".section");
+const footer = document.querySelector(".footer");
+const windowWidth = window.innerWidth;
+const mobileBreakpoint = 767;
+const tabletBreakpoint = 768;
 
 ///////////////////////////////////////
-// Button scrolling
+// Mobile Menu
 
-btnScrollTo.addEventListener("click", (e) => {
+hamburger.addEventListener("click", mobileMenu);
+
+function mobileMenu() {
+  hamburger.classList.toggle("active");
+  navLinksWrapper.classList.toggle("active");
+}
+
+///////////////////////////////////////
+// Scrolling to first section
+const btnScrollTo = document.querySelector("[data-scroll-to]");
+const section2 = document.querySelector("#section--2");
+
+btnScrollTo.addEventListener("click", function () {
   section2.scrollIntoView({ behavior: "smooth" });
 });
 
 ///////////////////////////////////////
-// Page navigation
-document.querySelector(".nav__logo").addEventListener("click", (e) => {
-  e.preventDefault();
-  const id = e.target.closest(".nav__link").getAttribute("href");
-  document.querySelector(id).scrollIntoView({ behavior: "smooth" });
-});
+// Navigation
 
-document.querySelector(".nav__links").addEventListener("click", (e) => {
+// Scrolling with event delegation
+
+navLinksWrapper.addEventListener("click", function (e) {
   e.preventDefault();
 
-  if (e.target.classList.contains("nav__link")) {
+  if (e.target.hasAttribute("data-nav-link")) {
     const id = e.target.getAttribute("href");
     document.querySelector(id).scrollIntoView({ behavior: "smooth" });
   }
 });
 
+// Menu fade animation
+
+const handleHover = function (e) {
+  if (e.target.classList.contains("nav__link")) {
+    const link = e.target;
+    const siblings = link.closest(".nav").querySelectorAll(".nav__link");
+
+    siblings.forEach((el) => {
+      if (el !== link) el.style.opacity = this;
+    });
+  }
+};
+//Setting "this" manually through "bind" to pass the opacity as an "argument" into the handler function
+nav.addEventListener("mouseover", handleHover.bind(0.5));
+nav.addEventListener("mouseout", handleHover.bind(1));
+
+//Sticky Navigation with Intersection Observer API
+
+/* The header element is being observed by the API since it becomes its "target" and as soon as it is no longer visible 
+  on the viewport (root: 0, threshold: 0), which means not being intersectioned anymore, the sticky class is added to it */
+
+const stickyNavCallback = function (entries) {
+  /* Entries represents the threshold options.
+    Since there is only one option this time, the entry is just destructured from entries
+  */
+  const [entry] = entries;
+  if (!entry.isIntersecting) {
+    nav.classList.add("sticky");
+  } else {
+    nav.classList.remove("sticky");
+  }
+};
+
+const stickyOptions = {
+  root: null, //by using null, the viewport is defined as the root
+  threshold: 0, //by using 0, the threshold is defined as soon as the header element is no longer visible
+  rootMargin: windowWidth > tabletBreakpoint ? `-${navHeight}px` : "300px", //that makes the sticky navigation appears before the section starts to prevent content overlapping
+};
+const headerObserver = new IntersectionObserver(
+  stickyNavCallback,
+  stickyOptions
+);
+headerObserver.observe(header);
+
 ///////////////////////////////////////
-// Tabbed Component
+// Reveal sections with Intersection Observer API
+const allSections = document.querySelectorAll("section");
 
-// One way to add the event listeners but not the best way
-// tabs.forEach((tab) => tab.addEventListener("click", () => console.log("tab")));
+const revealSection = function (entries, observer) {
+  const [entry] = entries; //get the threshold option
+  if (!entry.isIntersecting) return;
+  entry.target.classList.remove("section--hidden");
+  observer.unobserve(entry.target);
+};
 
-// Use event delegation
+const sectionObserver = new IntersectionObserver(revealSection, {
+  root: null, //consider viewport as the root
+  threshold: 0.15, // the section will be revealed when it is 15% visible
+});
+
+allSections.forEach(function (section) {
+  sectionObserver.observe(section);
+  // Consider the page top position to hide the section in case the user
+  // refresh the page while in a botton one.
+  var topPosition = document.body.getBoundingClientRect().top;
+  if (topPosition > -100) {
+    section.classList.add("section--hidden");
+  }
+});
+
+///////////////////////////////////////
+// Lazy loading images with Intersection Observer API
+
+const imgTargets = document.querySelectorAll("img[data-src]");
+
+const loadImg = function (entries, observer) {
+  const [entry] = entries;
+
+  if (!entry.isIntersecting) return;
+
+  //Replace src with data-src
+  entry.target.src = entry.target.dataset.src;
+
+  entry.target.addEventListener("load", function () {
+    entry.target.classList.remove("lazy-img");
+  });
+
+  observer.unobserve(entry.target);
+};
+
+const imgObserver = new IntersectionObserver(loadImg, {
+  root: null,
+  threshold: 0,
+  rootMargin: "-100px", //Make images load before the thresold is reached
+});
+
+imgTargets.forEach((img) => {
+  imgObserver.observe(img);
+});
+
+///////////////////////////////////////
+// Tabbed component
 tabsContainer.addEventListener("click", (e) => {
   const clicked = e.target.closest(".toolkit__tab");
 
@@ -66,193 +175,181 @@ tabsContainer.addEventListener("click", (e) => {
     .classList.add("toolkit__content--active");
 });
 
-///////////////////////////////////////
-// Menu Fade Animation
-const handleHover = function (e) {
-  if (e.target.classList.contains("nav__link")) {
-    const link = e.target;
-    const siblings = link.closest(".nav").querySelectorAll(".nav__link");
+// const tabTrigger = document.querySelectorAll('[data-tab]');
+// const tabContainer = document.querySelector('[data-tab-container]');
+// const tabContent = document.querySelectorAll('[data-tab-content]');
 
-    siblings.forEach((el) => {
-      if (el !== link) {
-        el.style.opacity = this;
-      }
-    });
-  }
-};
+// tabContainer.addEventListener('click', function (e) {
+//   const clickedBtn = e.target.closest('[data-tab]');
 
-// Option #1: Have a callback function with a function inside
-// nav.addEventListener("mouseover", (e) => handleHover(e, 0.5));
-// nav.addEventListener("mouseout", (e) => handleHover(e, 1));
+//   //Guard clause
+//   if (!clickedBtn) return;
 
-// Option #2: Use bind method
-// The "argument" or this keyword is now the opacity value and the event currentTarget stays the same
-nav.addEventListener("mouseover", handleHover.bind(0.5));
-nav.addEventListener("mouseout", handleHover.bind(1));
+//   //Activate tab
+//   tabTrigger.forEach(tab => tab.classList.remove('toolkit__tab--active'));
+//   clickedBtn.classList.add('toolkit__tab--active');
 
-///////////////////////////////////////
-// Sticky Navigation
-const header = document.querySelector(".header");
-const navHeight = nav.getBoundingClientRect().height;
-
-const stickyNav = function (entries) {
-  const [entry] = entries;
-
-  if (!entry.isIntersecting) nav.classList.add("sticky");
-  else nav.classList.remove("sticky");
-};
-
-const headerObserver = new IntersectionObserver(stickyNav, {
-  root: null,
-  threshold: 0,
-  rootMargin: `-${navHeight}px`,
-});
-headerObserver.observe(header);
-
-///////////////////////////////////////
-// Reveal Sections
-const revealSection = function (entries, observer) {
-  const [entry] = entries;
-
-  // Guard clause
-  if (!entry.isIntersecting) return;
-
-  entry.target.classList.remove("section--hidden");
-  observer.unobserve(entry.target);
-};
-
-const sectionObserver = new IntersectionObserver(revealSection, {
-  root: null,
-  threshold: 0.15,
-});
-
-allSections.forEach((section) => {
-  sectionObserver.observe(section);
-  section.classList.add("section--hidden");
-});
-
-///////////////////////////////////////
-// Lazy Loading Images
-
-const imgTargets = document.querySelectorAll("img[data-src]");
-
-const loadImg = function (entries, observer) {
-  const [entry] = entries;
-
-  // Guard clause
-  if (!entry.isIntersecting) return;
-
-  // Replace src with data-src
-  entry.target.src = entry.target.dataset.src;
-
-  entry.target.addEventListener("load", () => {
-    entry.target.classList.remove("lazy-img");
-  });
-
-  observer.unobserve(entry.target);
-};
-
-const imgObserver = new IntersectionObserver(loadImg, {
-  root: null,
-  threshold: 0,
-  rootMargin: "200px",
-});
-
-imgTargets.forEach((img) => {
-  imgObserver.observe(img);
-});
+//   //Activate content area
+//   tabContent.forEach(tab => tab.classList.remove('toolkit__content--active'));
+//   document
+//     .querySelector(`.toolkit__content--${clickedBtn.dataset.tab}`)
+//     .classList.add('toolkit__content--active');
+// });
 
 ///////////////////////////////////////
 // Slider
-const slider = () => {
+const slider = function () {
+  const sliderContainer = document.querySelector(".slider");
   const slides = document.querySelectorAll(".slide");
-  const btnLeft = document.querySelector(".slider__btn--left");
-  const btnRight = document.querySelector(".slider__btn--right");
-  const dotsContainer = document.querySelector(".dots");
+  let currentSlide = 0;
+  const maxSlide = slides.length;
+  const btnLeft = document.querySelector("[data-slider-left]");
+  const btnRight = document.querySelector("[data-slider-right]");
+  const dotContainer = document.querySelector("[data-dots-container]");
 
-  let curSlide = 0;
-  const maxSlide = slides.length - 1;
-
-  const slider = document.querySelector(".slider");
-  slider.style.overflow = "invisible";
-
-  slides.forEach(
-    (slide, index) => (slide.style.transform = `translateX(${index * 100}%)`)
-  );
-
-  const createDots = () => {
+  const createDots = function () {
     slides.forEach((_, i) => {
-      dotsContainer.insertAdjacentHTML(
-        "beforeend",
-        `<button class='dots__dot' data-slide='${i}'></button>`
-      );
+      const btnDot = `<button class="dots__dot" data-slide="${i}"></button>`;
+      dotContainer.insertAdjacentHTML("beforeend", btnDot);
     });
   };
 
-  const activateDot = (slide) => {
-    // Remove the active class from all the dots
+  const goToSlide = function (slide) {
+    slides.forEach((s, i) => {
+      s.style.transform = `translateX(${100 * (i - slide)}%)`;
+    });
+
+    activeDot(slide);
+
+    btnRight.classList.remove("disabled");
+    btnLeft.classList.remove("disabled");
+    if (slide === 0) {
+      btnLeft.classList.add("disabled");
+    }
+    if (slide === maxSlide - 1) {
+      btnRight.classList.add("disabled");
+    }
+  };
+
+  const activeDot = function (slide) {
+    //Remove all active dot styling first
     document
       .querySelectorAll(".dots__dot")
       .forEach((dot) => dot.classList.remove("dots__dot--active"));
 
-    // Add the active class to the current dot
     document
       .querySelector(`.dots__dot[data-slide="${slide}"]`)
       .classList.add("dots__dot--active");
   };
 
-  const goToSlide = (cur) => {
-    slides.forEach(
-      (s, i) => (s.style.transform = `translateX(${(i - cur) * 100}%)`)
-    );
-    activateDot(cur);
-  };
-
-  const nextSlide = () => {
-    if (curSlide === maxSlide) {
-      curSlide = 0;
-    } else {
-      curSlide++;
+  dotContainer.addEventListener("click", function (e) {
+    if (e.target.classList.contains("dots__dot")) {
+      const slide = e.target.dataset.slide;
+      goToSlide(Number(slide));
     }
+  });
 
-    goToSlide(curSlide);
+  //Next slide
+  const nextSlide = function () {
+    currentSlide++;
+    goToSlide(currentSlide);
   };
 
-  const prevSlide = () => {
-    if (curSlide === 0) {
-      curSlide = maxSlide;
-    } else {
-      curSlide--;
-    }
-
-    goToSlide(curSlide);
+  // Previous slide
+  const prevSlide = function () {
+    currentSlide--;
+    goToSlide(currentSlide);
   };
 
-  const init = () => {
+  //Initiate always on slide 0
+  const initSlider = function () {
     createDots();
     goToSlide(0);
-    activateDot(0);
   };
 
-  init();
+  initSlider();
 
-  // Event Handlers
+  //Event handlers
   btnRight.addEventListener("click", nextSlide);
   btnLeft.addEventListener("click", prevSlide);
 
-  document.addEventListener("keydown", (e) => {
-    // Short circuiting
+  document.addEventListener("keydown", function (e) {
     e.key === "ArrowLeft" && prevSlide();
     e.key === "ArrowRight" && nextSlide();
   });
 
-  // Event delegation
-  dotsContainer.addEventListener("click", (e) => {
-    if (e.target.classList.contains("dots__dot")) {
-      const { slide } = e.target.dataset;
-      goToSlide(slide);
+  const sliderTouch = function () {
+    let isDragging = false,
+      startPos = 0,
+      currentTranslate = 0,
+      prevTranslate = 0,
+      currentIndex = 0;
+
+    slides.forEach((slide, index) => {
+      slide.addEventListener("dragstart", (e) => e.preventDefault());
+      // touch events
+      slide.addEventListener("touchstart", touchStart(index));
+      slide.addEventListener("touchend", touchEnd);
+      slide.addEventListener("touchmove", touchMove);
+      // mouse events
+      slide.addEventListener("mousedown", touchStart(index));
+      slide.addEventListener("mouseup", touchEnd);
+      slide.addEventListener("mousemove", touchMove);
+      slide.addEventListener("mouseleave", touchEnd);
+    });
+
+    // make responsive to viewport changes
+    window.addEventListener("resize", setPositionByIndex);
+
+    // prevent menu popup on long press
+    window.oncontextmenu = function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    };
+
+    function getPositionX(event) {
+      return event.type.includes("mouse")
+        ? event.pageX
+        : event.touches[0].clientX;
     }
-  });
+    function touchStart(index) {
+      return function (event) {
+        currentIndex = index;
+        startPos = getPositionX(event);
+        isDragging = true;
+        sliderContainer.classList.add("grabbing");
+      };
+    }
+    function touchMove(event) {
+      if (isDragging) {
+        const currentPosition = getPositionX(event);
+        currentTranslate = prevTranslate + currentPosition - startPos;
+      }
+    }
+    function touchEnd() {
+      isDragging = false;
+      const movedBy = currentTranslate - prevTranslate;
+      // if moved enough negative then snap to next slide if there is one
+      if (movedBy < -100 && currentIndex < slides.length - 1) {
+        currentIndex++;
+        goToSlide(currentIndex);
+      }
+
+      // if moved enough positive then snap to previous slide if there is one
+      if (movedBy > 100 && currentIndex > 0) {
+        currentIndex--;
+        goToSlide(currentIndex);
+      }
+      setPositionByIndex();
+      sliderContainer.classList.remove("grabbing");
+    }
+    function setPositionByIndex() {
+      currentTranslate = currentIndex * -window.innerWidth;
+      prevTranslate = currentTranslate;
+    }
+  };
+  sliderTouch();
 };
 
 slider();

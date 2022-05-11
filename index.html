@@ -16,34 +16,34 @@
     />
     <link rel="stylesheet" href="style.css" />
     <title>Moses Lee | Web Developer</title>
-
     <script defer src="script.js"></script>
   </head>
   <body>
     <header class="header" id="section--1">
       <nav class="nav">
-        <a class="nav__link" href="#section--1">
-          <img
-            src="img/logo.png"
-            alt="saintm logo"
-            class="nav__logo"
-            id="logo"
-            data-version-number="3.0"
-          />
-        </a>
-
-        <ul class="nav__links">
+        <img src="img/logo.png" alt="saintm logo" class="nav__logo" id="logo" />
+        <ul class="nav__links" data-nav-links>
           <li class="nav__item">
-            <a class="nav__link" href="#section--1">About</a>
+            <a class="nav__link" href="#section--1" data-nav-link>About</a>
           </li>
           <li class="nav__item">
-            <a class="nav__link" href="#section--2">Work</a>
+            <a class="nav__link" href="#section--2" data-nav-link>Work</a>
           </li>
           <li class="nav__item">
-            <a class="nav__link" href="#section--3">Contact Me</a>
+            <a class="nav__link" href="#section--3" data-nav-link>My Toolkit</a>
+          </li>
+          <li class="nav__item">
+            <a class="nav__link" href="#section--4" data-nav-link>Contact Me</a>
           </li>
         </ul>
+        <div class="nav__hamburger" data-nav-hamburguer>
+          <span class="nav__hamburger__bar"></span>
+          <span class="nav__hamburger__bar"></span>
+          <span class="nav__hamburger__bar"></span>
+          <span class="nav__hamburger__bar"></span>
+        </div>
       </nav>
+
       <div class="header__title">
         <h1 class="heading-primary">
           <div class="heading-primary--main">
@@ -55,16 +55,15 @@
           </div>
         </h1>
         <h4>In an infinite loop of learning, improving, and achieving.</h4>
-        <button class="btn--text btn--scroll-to">Let's go &DownArrow;</button>
-        <img
-          src="img/hero.jpg"
-          class="header__img"
-          alt="Minimalist bank items"
-        />
+        <button class="btn--text btn--scroll-to" data-scroll-to>
+          Let's go &DownArrow;
+        </button>
+        <img src="img/hero.jpg" class="header__img" alt="profile image" />
       </div>
     </header>
 
-    <section class="section" id="section--2">
+    <div id="section--2"></div>
+    <section class="section">
       <div class="section__title">
         <h2 class="section__description">Work</h2>
         <h3 class="section__header">
@@ -72,6 +71,7 @@
         </h3>
       </div>
 
+      <!-- Projects -->
       <div class="projects">
         <a href="https://www.architechdoors.com/ " target="_blank"
           ><img
@@ -133,8 +133,72 @@
           </p>
         </div>
       </div>
+
+      <!-- Projects Mobile -->
+      <div class="projects mobile">
+        <a href="https://www.architechdoors.com/ " target="_blank"
+          ><img
+            src="img/adi-lazy.png"
+            data-src="img/adi.png"
+            alt="Arch-I-Tech-Doors"
+            class="projects__img lazy-img"
+        /></a>
+
+        <div class="projects__feature">
+          <h5 class="projects__header">Arch-I-Tech-Doors</h5>
+          <p>
+            <strong>Overview:</strong> E-commerce site that sells custom
+            commercial doors that generates $4 million annual revenue
+          </p>
+          <p>
+            <strong>Tools:</strong> JavaSript, HTML5, CSS3, Vue, Laravel, PHP,
+            PostgreSQL
+          </p>
+        </div>
+
+        <a href="https://www.getcultureworx.com/" target="_blank">
+          <img
+            src="img/cultureworx-lazy.png"
+            data-src="img/cultureworx.png"
+            alt="CultureWorx"
+            class="projects__img lazy-img"
+          />
+        </a>
+        <div class="projects__feature">
+          <h5 class="projects__header">CultureWorx</h5>
+          <p>
+            <strong>Overview:</strong> A web and mobile based business culture
+            management software that gets to the root, reinforcing leadership
+            behaviors that optimize employee engagement & business results
+          </p>
+          <p>
+            <strong>Tools:</strong> JavaSript, HTML5, CSS3, Vue, Flutter,
+            Laravel, PHP, PostgreSQL
+          </p>
+        </div>
+
+        <img
+          src="img/levvos-lazy.png"
+          data-src="img/levvos.png"
+          alt="Levvos"
+          class="projects__img lazy-img"
+        />
+        <div class="projects__feature">
+          <h5 class="projects__header">Levvos</h5>
+          <p>
+            <strong>Overview:</strong> A progressive web application that allows
+            clients, companies, and employees to provide reviews and ratings of
+            each other
+          </p>
+          <p>
+            <strong>Tools:</strong> JavaSript, HTML5, CSS3, Vue, Laravel, PHP,
+            PostgreSQL
+          </p>
+        </div>
+      </div>
     </section>
 
+    <!-- Side Projects -->
     <section class="section">
       <div class="section__title section__title--side-projects">
         <h2 class="section__description">Personal Projects</h2>
@@ -271,22 +335,28 @@
           </div>
         </div>
 
-        <button class="slider__btn slider__btn--left">&larr;</button>
-        <button class="slider__btn slider__btn--right">&rarr;</button>
-        <div class="dots"></div>
+        <button class="slider__btn slider__btn--left" data-slider-left>
+          &larr;
+        </button>
+        <button class="slider__btn slider__btn--right" data-slider-right>
+          &rarr;
+        </button>
+        <div class="dots" data-dots-container></div>
       </div>
     </section>
 
+    <div id="section--3"></div>
+    <!-- New -->
     <section class="section">
       <div class="section__title">
         <h2 class="section__description">My Toolkit</h2>
         <h3 class="section__header">
-          Always sharpening and adding to my toolkit 🧰
+          Everything as simple as possible, but no simpler.
         </h3>
       </div>
 
       <div class="toolkit">
-        <div class="toolkit__tab-container">
+        <div class="toolkit__tab-container" data-tab-container>
           <button
             class="btn toolkit__tab toolkit__tab--1 toolkit__tab--active"
             data-tab="1"
@@ -319,20 +389,20 @@
           <span class="toolkit__skill">Jest</span>
         </div>
         <div class="toolkit__content toolkit__content--3">
-          <p>
-            <span class="toolkit__skill">Problem solving</span>
-            <span class="toolkit__skill">Collaborating</span>
-            <span class="toolkit__skill">Communicating</span>
-            <span class="toolkit__skill">Debugging</span>
-            <span class="toolkit__skill">Testing</span>
-            <span class="toolkit__skill">Researching</span>
-            <span class="toolkit__skill">Decision making</span>
-          </p>
+          <span class="toolkit__skill">Problem solving</span>
+          <span class="toolkit__skill">Collaborating</span>
+          <span class="toolkit__skill">Communicating</span>
+          <span class="toolkit__skill">Debugging</span>
+          <span class="toolkit__skill">Testing</span>
+          <span class="toolkit__skill">Researching</span>
+          <span class="toolkit__skill">Decision making</span>
         </div>
       </div>
     </section>
 
-    <section class="section section--contact-me" id="section--3">
+    <!-- Contact Me -->
+    <div id="section--4"></div>
+    <section class="section section--contact-me">
       <div class="section__title">
         <h3 class="section__header">
           So many ways to get connected. Let's chat soon!
@@ -375,7 +445,6 @@
         alt="saintm logo"
         class="footer__logo"
         id="logo"
-        data-version-number="3.0"
       />
     </footer>
   </body>
