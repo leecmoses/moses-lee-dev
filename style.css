@@ -668,6 +668,7 @@ h4 {
     left: -100%;
     transition: 0.3s;
     display: none;
+    color: var(--text-content-color);
   }
 
   .nav__links.active {
